@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const invitacion = document.getElementById('invitacion');
   const musicaBtn = document.getElementById('musica-btn');
   const musica = document.getElementById('musica-fondo');
-  musica.volume = 0.1;
-
   const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
@@ -150,7 +148,38 @@ document.addEventListener('DOMContentLoaded', function () {
   radiosAsistencia.forEach(function (r) {
     r.addEventListener('change', actualizarAsistencia);
   });
+
+    const VOLUMEN = 0.5;
+  let ctxAudio = null;
+  let usaWebAudio = false;
+
+  // iOS ignora musica.volume; en el resto sí funciona
+  const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  function prepararVolumen() {
+    if (ctxAudio || !esIOS) return;          // solo iOS usa Web Audio
+    if (location.protocol === 'file:') return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+
+    try {
+      ctxAudio = new AC();
+      const fuente = ctxAudio.createMediaElementSource(musica);
+      const ganancia = ctxAudio.createGain();
+      ganancia.gain.value = VOLUMEN;
+      fuente.connect(ganancia);
+      ganancia.connect(ctxAudio.destination);
+      usaWebAudio = true;
+    } catch (err) {
+      ctxAudio = null;
+    }
+  }
+
   function reproducir() {
+    if (!usaWebAudio) musica.volume = VOLUMEN;   // Android y computador
+    prepararVolumen();
+    if (ctxAudio && ctxAudio.state === 'suspended') ctxAudio.resume();
     musica.play().catch(function () { musicaBtn.classList.add('silenciado'); });
   }
 

@@ -149,27 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
   radiosAsistencia.forEach(function (r) {
     r.addEventListener('change', actualizarAsistencia);
   });
-
-  // Volumen con Web Audio API (funciona también en iPhone)
-  const VOLUMEN = 0.25;   // 0.1 muy bajo · 0.25 bajo · 0.5 mitad
-  let ctxAudio = null;
-
-  function prepararVolumen() {
-    if (ctxAudio) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) { musica.volume = VOLUMEN; return; }
-
-    ctxAudio = new AC();
-    const fuente = ctxAudio.createMediaElementSource(musica);
-    const ganancia = ctxAudio.createGain();
-    ganancia.gain.value = VOLUMEN;
-    fuente.connect(ganancia);
-    ganancia.connect(ctxAudio.destination);
-  }
-
   function reproducir() {
-    prepararVolumen();
-    if (ctxAudio && ctxAudio.state === 'suspended') ctxAudio.resume();
     musica.play().catch(function () { musicaBtn.classList.add('silenciado'); });
   }
 

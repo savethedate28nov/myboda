@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     sobre.classList.add('abriendo');
     sobre.removeAttribute('tabindex');
-    musica.currentTime = 5;
+    musica.currentTime = 0;
     reproducir();
 
 
